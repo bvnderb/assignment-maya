@@ -1,0 +1,1 @@
+const ASSISTANT_MESSAGES = require('../data/messages')
