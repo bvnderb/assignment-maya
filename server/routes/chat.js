@@ -24,14 +24,14 @@ const streamMessage = async (res, streamId, messageIndex, startFrom) => {
             pausedStreams[streamId] = i
             break
         } 
-            res.write(`data: ${JSON.stringify({ type: 'token', word: words[i] })}\n\n`)
+            res.write(`event: token\ndata: ${JSON.stringify({ type: 'token', word: words[i] })}\n\n`)
             await delay(Math.random() * 40 + 40)
     }
 
     if (pausedStreams[streamId] !== undefined) {
-            res.write(`data: ${JSON.stringify({ type: 'paused' })}\n\n`)
+            res.write(`event: paused\ndata: ${JSON.stringify({ type: 'paused' })}\n\n`)
         } else {
-            res.write(`data: ${JSON.stringify({ type: 'done' })}\n\n`)
+            res.write(`event: done\ndata: ${JSON.stringify({ type: 'done' })}\n\n`)
         }
     res.end()
 }
