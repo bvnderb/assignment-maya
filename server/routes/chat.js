@@ -48,8 +48,8 @@ router.post('/stop', (req, res) => {
     res.json({ success: true })
 })
 
-router.post('/resume', async (req, res) => {
-    const streamId = req.body.streamId
+router.get('/resume/:streamId', async (req, res) => {
+    const streamId = req.params.streamId
     const wordIndex = pausedStreams[streamId]
     delete pausedStreams[streamId]
     await streamMessage(res, streamId, messageIndex, wordIndex)
