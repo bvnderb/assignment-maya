@@ -93,7 +93,14 @@ function handleResume() {
 
   return (
     <div className="chat-window">
-      <MessageList messages={messages} />
+      {messages.length === 0 ? (
+        <div className="welcome">
+          <h1>Welcome</h1>
+          <p>Ask a question to get started</p>
+          </div>
+        ) : 
+        (<MessageList messages={messages} />)
+        }
       <InputBar
         inputValue={inputValue}
         streamStatus={streamStatus}

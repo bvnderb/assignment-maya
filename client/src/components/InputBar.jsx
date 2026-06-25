@@ -1,16 +1,23 @@
 function InputBar ({ inputValue, streamStatus, onChange, onSend, onStop, onResume }) {
     let button;
     if (streamStatus === "idle") {
-        button = <button onClick={onSend}>Send</button>
+        button = <button className="btn btn-send" onClick={onSend}>Send</button>
     } else if (streamStatus === "streaming") {
-        button = <button onClick={onStop}>Stop</button>
+        button = <button className="btn btn-stop" onClick={onStop}>Stop</button>
     } else {
-        button = <button onClick={onResume}>Resume</button>
-    } return (
-    <div>
-         <textarea classname="input-bar" value={inputValue} onChange={onChange}></textarea>
-         {button}
-    </div>
+        button = <button className="btn btn-resume" onClick={onResume}>Resume</button>
+    } 
+    function handleKeyDown(e){
+    if (e.key === "Enter" || e.key === "NumpadEnter") {
+        e.preventDefault();
+        onSend();
+    }
+}
+    return (
+        <div className="input-bar">
+            <textarea placeholder="Type here" value={inputValue} onChange={onChange} onKeyDown={handleKeyDown}></textarea>
+            {button}
+        </div>
     );
 }
 
