@@ -21,7 +21,7 @@ const streamMessage = async (res, streamId, messageIndex, startFrom) => {
 
     for (let i = startFrom; i < words.length; i++) {
         if (controller.signal.aborted) {
-            pausedStreams[streamId] = i
+            pausedStreams[streamId] = { wordIndex: i, messageIndex: messageIndex }
             break
         } 
             res.write(`event: token\ndata: ${JSON.stringify({ type: "token", word: words[i] })}\n\n`)
@@ -50,10 +50,9 @@ router.post("/stop", (req, res) => {
 
 router.get("/resume/:streamId", async (req, res) => {
     const streamId = req.params.streamId
-    const wordIndex = pausedStreams[streamId]
+    const { wordIndex, messageIndex } = pausedStreams[streamId]
     delete pausedStreams[streamId]
     await streamMessage(res, streamId, messageIndex, wordIndex)
-    messageIndex = (messageIndex + 1) % ASSISTANT_MESSAGES.length
 })
 
 
