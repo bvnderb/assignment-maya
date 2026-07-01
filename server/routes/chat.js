@@ -50,6 +50,10 @@ router.post("/stop", (req, res) => {
 
 router.get("/resume/:streamId", async (req, res) => {
     const streamId = req.params.streamId
+    
+    if (!pausedStreams[streamId]) {
+    return res.status(404).json({ error: "Stream not found" })
+}
     const { wordIndex, messageIndex } = pausedStreams[streamId]
     delete pausedStreams[streamId]
     await streamMessage(res, streamId, messageIndex, wordIndex)
