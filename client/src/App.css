@@ -72,11 +72,9 @@ textarea {
 
 .bubble-assistant {
   background: #7B68F9;
-  color: white; 
+  color: white;
   border-radius: 18px;
-  align-self: flex-start;
   padding: 10px 14px;
-  max-width: 48%;
   padding-top: 10px;
 }
 
@@ -99,4 +97,46 @@ textarea {
   color: black;
   margin-top: 12px;
   margin-left: 10px;
+}
+
+.bubble-wrapper-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.bubble-wrapper-assistant {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  max-width: 48%;
+}
+
+.bubble-actions {
+  display: flex;
+  align-self: flex-end;
+  margin-top: 4px;
+  gap: 6px;
+}
+
+.bubble-status {
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.5;
+  color: #333;
+}
+
+.btn-retry {
+  margin-top: 4px;
+  background: none;
+  border: 1px solid #7B68F9;
+  color: #7B68F9;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.btn-retry:hover {
+  background: rgba(123, 104, 249, 0.1);
 }
