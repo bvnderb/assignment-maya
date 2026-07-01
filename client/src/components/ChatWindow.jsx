@@ -23,7 +23,7 @@ function ChatWindow() {
     setStreamStatus("streaming");
     setInputValue("");
 
-    sourceRef.current = new EventSource("http://localhost:3000/chat/stream");
+    sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/stream`);
     sourceRef.current.addEventListener("token", (e) => {
       const parsed = JSON.parse(e.data);
       const word = parsed.word;
@@ -55,7 +55,7 @@ function ChatWindow() {
       updated[prev.length - 1].stopped = true;
       return updated;
     });
-    fetch("http://localhost:3000/chat/stop", {
+    fetch(`${import.meta.env.VITE_API_URL}/chat/stop`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ streamId }),
@@ -71,7 +71,7 @@ function handleResume() {
     return updated;
   });
 
-  sourceRef.current = new EventSource(`http://localhost:3000/chat/resume/${streamId}`);
+  sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/resume/${streamId}`);
 
   sourceRef.current.addEventListener("token", (e) => {
     const parsed = JSON.parse(e.data);
