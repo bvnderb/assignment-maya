@@ -9,6 +9,32 @@ function ChatWindow() {
   const [inputValue, setInputValue] = useState("");
   const sourceRef = useRef(null);
 
+  function attachListeners(source) {
+    source.addEventListener("message", (e) => {
+      const parsed = JSON.parse(e.data);
+      setStreamId(parsed.streamId);
+    });
+
+    source.addEventListener("done", () => {
+      setStreamStatus("idle");
+      console.log("stream done");
+      source.close();
+    });
+
+    source.addEventListener("token", (e) => {
+    const parsed = JSON.parse(e.data);
+    const word = parsed.word;
+    
+    setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].content += word + " ";
+        return updated;
+      });
+  });
+
+  source.onerror = handleError;
+  }
+
   function handleChange(e) {
     setInputValue(e.target.value);
   }
@@ -16,35 +42,19 @@ function ChatWindow() {
   function handleSend() {
     const newMessages = [
       ...messages,
-      { role: "user", content: inputValue, stopped: false },
-      { role: "assistant", content: "", stopped: false },
+      { role: "user", content: inputValue, stopped: false, failed: false },
+      { role: "assistant", content: "", stopped: false, failed: false },
     ];
     setMessages(newMessages);
     setStreamStatus("streaming");
     setInputValue("");
 
+    if (sourceRef.current) {
+      sourceRef.current.close()
+  }
+
     sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/stream`);
-    sourceRef.current.addEventListener("token", (e) => {
-      const parsed = JSON.parse(e.data);
-      const word = parsed.word;
-
-      setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1].content += word + " ";
-        return updated;
-      });
-    });
-
-    sourceRef.current.addEventListener("message", (e) => {
-      const parsed = JSON.parse(e.data);
-      setStreamId(parsed.streamId);
-    });
-
-    sourceRef.current.addEventListener("done", () => {
-      setStreamStatus("idle");
-      console.log("stream done");
-      sourceRef.current.close();
-    });
+    attachListeners(sourceRef.current);
   }
 
   function handleStop() {
@@ -73,23 +83,31 @@ function handleResume() {
 
   sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/resume/${streamId}`);
 
-  sourceRef.current.addEventListener("token", (e) => {
-    const parsed = JSON.parse(e.data);
-    const word = parsed.word;
-    
-    setMessages((prev) => {
-        const updated = [...prev];
-        updated[updated.length - 1].content += word + " ";
-        return updated;
-      });
-  });
-
-  sourceRef.current.addEventListener("done", () => {
-    setStreamStatus("idle");
-      console.log("stream done");
-      sourceRef.current.close();
-  });
+  attachListeners(sourceRef.current);
 }
+
+  function handleError() {
+    sourceRef.current.close();
+    setStreamStatus("failed");
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated[prev.length - 1].failed = true;
+      return updated;
+    })
+  }
+
+  function handleRetry() {
+    sourceRef.current.close();
+    setStreamStatus("streaming");
+    setMessages((prev) => {
+      const updated = [...prev];
+      updated[prev.length - 1].content = "";
+      updated[prev.length - 1].failed = false;
+      return updated;
+    })
+    sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/stream`);
+    attachListeners(sourceRef.current);
+  }
 
   return (
     <div className="chat-window">
@@ -99,7 +117,10 @@ function handleResume() {
           <p>Ask a question to get started</p>
           </div>
         ) : 
-        (<MessageList messages={messages} />)
+        (<MessageList 
+          messages={messages} 
+          onRetry={handleRetry}
+        />)
         }
       <InputBar
         inputValue={inputValue}

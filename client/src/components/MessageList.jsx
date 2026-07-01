@@ -1,7 +1,7 @@
 import MessageBubble from "./MessageBubble";
 import { useRef, useEffect } from "react";
 
-function MessageList({ messages }) {
+function MessageList({ messages, onRetry }) {
     const messagesEndRef = useRef(null)
     const scrollToBottom = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -18,6 +18,8 @@ function MessageList({ messages }) {
                 role={ message.role }
                 content={ message.content }
                 stopped={ message.stopped }
+                failed={ message.failed }
+                onRetry={ onRetry }
                 />
             )
             )}
