@@ -52,10 +52,16 @@ The client runs on **http://localhost:5173**
 
 ## Bonuses covered
 
-None of the optional bonuses were implemented. The focus was on solid core functionality, clear architecture, and clean code.
+- [x] **Conversation persistence (localStorage)** — chat history is saved to `localStorage` on every change and restored automatically on page load/refresh. See ARCHITECTURE.md for implementation details.
+- [ ] Resume after reconnect (auto-recover on connection drop)
+- [ ] Regenerate last reply
+- [ ] Tests proving server-side cancellation
+- [ ] Docker + docker-compose
+
+(In progress — being completed incrementally.)
 
 ---
 
 ## Time spent
 
-~17 hours on the core app. According to Waka time, divided over about 2 weeks from getting the assignment to finishing it.
+~22 hours on the core app. According to Waka time, divided over about 2 weeks from getting the assignment to finishing it.
