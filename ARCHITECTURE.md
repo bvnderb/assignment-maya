@@ -72,6 +72,8 @@ When the user clicks Resume:
 - **Mid-stream cancellation** — Stop button cancels server-side via `AbortController`; partial reply is preserved and marked as stopped
 - **Resume after stop** — resumes from the correct word and correct message using saved state in `pausedStreams`
 - **Wrong message on resume** — fixed by saving `messageIndex` alongside `wordIndex` in `pausedStreams`; the global `messageIndex` is only incremented by `/stream` after a full or partial stream completes
+- **Stream failure / dropped connection** — the frontend attaches an `onerror` handler to every `EventSource` (covering both the initial stream and resume). When it fires, the connection is closed immediately and the message is marked `failed`, showing a Retry button on that specific message. This intentionally overrides `EventSource`'s native auto-reconnect behavior — left alone, the browser would keep silently retrying the connection in the background and could resume delivering tokens into a message the UI had already given up on, producing duplicate or ghost content
+- **Retry after failure** — clicking Retry on a failed message restarts the stream from scratch (`/chat/stream`) into that same message slot: previous partial content and the `failed` flag are cleared first, so the retry reuses the existing bubble instead of appending a new one
 
 ### Knowingly left out
 
@@ -79,3 +81,4 @@ When the user clicks Resume:
 - **`connected` event fires on resume as well as on initial stream** — not fixed because `handleResume` registers no `message` event listener, so the event is silently ignored and causes no side effects
 - **Auto-recovery on connection drop** — if the SSE connection drops unexpectedly (network issue), the stream is not automatically resumed. The user would need to refresh. This was out of scope for this assignment.
 - **No persistence** — conversation history is held in React state only. Refreshing the page clears everything.
+- **Stale UI state after a server restart on Railway** — `activeStreams` and `pausedStreams` live only in server memory. If the Railway container restarts or redeploys (e.g. a crash, a new deploy, or the free-tier service waking from idle) while a message is mid-stream or paused, that in-memory state is wiped. A client still holding an old `streamId` can be left showing a stale state (e.g. a message stuck as "Stopped") until the user sends a new message or refreshes. This is a direct consequence of the "no persistence" decision above — fixing it properly would mean moving stream state into a database or something like Redis, which is out of scope for this assignment. Noted here as a known limitation rather than fixed.
