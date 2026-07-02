@@ -1,14 +1,23 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import MessageList from "./MessageList";
 import InputBar from "./InputBar";
 
 function ChatWindow() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(loadState);
   const [streamId, setStreamId] = useState(null);
   const [streamStatus, setStreamStatus] = useState("idle");
   const [inputValue, setInputValue] = useState("");
   const sourceRef = useRef(null);
 
+  useEffect(() => {
+        localStorage.setItem("chatState", JSON.stringify(messages))
+      }, [messages]);
+
+    function loadState() {
+    const saved = localStorage.getItem("chatState");
+    return saved ? JSON.parse(saved) : []; 
+  }
+      
   function attachListeners(source) {
     source.addEventListener("message", (e) => {
       const parsed = JSON.parse(e.data);
@@ -82,7 +91,6 @@ function handleResume() {
   });
 
   sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/resume/${streamId}`);
-
   attachListeners(sourceRef.current);
 }
 
