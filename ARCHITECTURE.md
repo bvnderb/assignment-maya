@@ -79,7 +79,6 @@ When the user clicks Resume:
 
 - **`/stop` has no guard if `streamId` is missing from `activeStreams`** — not fixed because the UI prevents this: the Stop button is only visible while streaming is active, so a valid `streamId` always exists
 - **`connected` event fires on resume as well as on initial stream** — not fixed because `handleResume` registers no `message` event listener, so the event is silently ignored and causes no side effects
-- **Auto-recovery on connection drop** — if the SSE connection drops unexpectedly (network issue), the stream is not automatically resumed. The user would need to refresh. This was out of scope for this assignment.
 - **Stale UI state after a server restart on Railway** — `activeStreams` and `pausedStreams` live only in server memory. If the Railway container restarts or redeploys (e.g. a crash, a new deploy, or the free-tier service waking from idle) while a message is mid-stream or paused, that in-memory state is wiped. A client still holding an old `streamId` can be left showing a stale state (e.g. a message stuck as "Stopped") until the user sends a new message or refreshes. This is a consequence of choosing not to run a database for stream state — fixing it properly would mean moving `activeStreams`/`pausedStreams` into a database or something like Redis, which is out of scope for this assignment. Note that this is distinct from *conversation* persistence, which is covered separately below. Noted here as a known limitation rather than fixed.
 
 ---
@@ -95,3 +94,20 @@ Conversations are persisted to the browser's `localStorage`, so a page refresh d
 **Load — the lazy initializer pattern:** `messages` is initialized with `useState(loadState)`, passing the `loadState` function itself (not calling it — no parentheses) as the initial-value argument. React calls it exactly once, synchronously, during the component's very first render — before any `useEffect` runs. This matters because of a real race condition encountered while building it: if loading had instead happened inside a `useEffect` (which only runs *after* the first render), the *save* effect's first run would fire on that same initial render too, immediately overwriting any saved conversation with `messages`' still-empty starting value, before the load effect ever got a chance to populate it. The lazy initializer closes that gap entirely, since `messages` already holds the loaded data before any effect runs at all.
 
 **The `JSON.parse(null)` gotcha:** `localStorage.getItem` returns `null` (not `undefined`, not an empty string) when a key was never set. `JSON.parse(null)` does not throw — `null` gets coerced to the string `"null"`, which is valid JSON, so it returns the JS value `null`. Left unguarded, that would set `messages` to `null` on a first-ever visit, and the app would crash on render (`null.length` and `[...null]` both throw). `loadState` guards against this with a simple ternary: `saved ? JSON.parse(saved) : []`.
+
+---
+
+## Bonus: Resume after reconnect
+
+If the SSE connection drops unexpectedly — a network blip, wifi dropping, a tab losing connectivity mid-stream — the app now detects it and resumes automatically, without the user clicking anything.
+
+**Server-side detection:** `res` (the Express response object) emits a `close` event whenever the underlying connection is torn down, whether that's a normal finish or a client disconnecting mid-stream. `streamMessage` hooks that event straight into the same cancellation mechanism already used by `/stop`:
+```js
+const controller = new AbortController()
+res.on("close", () => controller.abort())
+```
+Because the streaming loop already checks `controller.signal.aborted` and saves `{ wordIndex, messageIndex }` to `pausedStreams` before breaking, a real disconnect is handled by the exact same code path as a manual Stop — no separate detection logic needed. Calling `.abort()` after the loop has already finished normally is a harmless no-op, since nothing checks the signal again after that point.
+
+**Client-side auto-retry:** `handleError` checks a `retryCount` ref against a `maxRetries` cap (3) before falling back to the existing failed/Retry-button state. If attempts remain, it increments the counter, closes the stale `EventSource`, and calls `handleResume()` automatically. The counter resets to `0` on two "connection is healthy again" signals: a stream reaching its `done` event, or the user manually clicking Retry. Without a cap, a persistently unreachable server would cause an infinite retry loop — each failed resume attempt opening a new `EventSource` that immediately errors again, forever.
+
+**Testing note:** verifying this locally has a couple of non-obvious gotchas. Chrome DevTools' "Offline" network throttle does not reliably interrupt an already-open connection to `localhost` — the stream kept flowing as if nothing happened. Killing and restarting the local server to simulate a drop doesn't work either, since `pausedStreams` only ever lives in that process's memory and gets wiped on restart. The reliable local test was to reload the browser tab mid-stream (a real disconnect from the server's perspective, while the server process itself stays untouched) and manually hit `/chat/resume/:streamId` to confirm the server resumed from the correct word instead of 404ing.

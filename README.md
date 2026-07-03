@@ -53,7 +53,7 @@ The client runs on **http://localhost:5173**
 ## Bonuses covered
 
 - [x] **Conversation persistence (localStorage)** — chat history is saved to `localStorage` on every change and restored automatically on page load/refresh. See ARCHITECTURE.md for implementation details.
-- [ ] Resume after reconnect (auto-recover on connection drop)
+- [x] **Resume after reconnect** — a dropped connection is detected server-side and the stream resumes automatically, retrying up to 3 times before falling back to a manual Retry button. See ARCHITECTURE.md for implementation details.
 - [ ] Regenerate last reply
 - [ ] Tests proving server-side cancellation
 - [ ] Docker + docker-compose
