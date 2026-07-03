@@ -139,6 +139,7 @@ function handleResume() {
         (<MessageList 
           messages={messages} 
           onRetry={handleRetry}
+          streamStatus={streamStatus}
         />)
         }
       <InputBar
