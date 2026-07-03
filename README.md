@@ -54,7 +54,7 @@ The client runs on **http://localhost:5173**
 
 - [x] **Conversation persistence (localStorage)** — chat history is saved to `localStorage` on every change and restored automatically on page load/refresh. See ARCHITECTURE.md for implementation details.
 - [x] **Resume after reconnect** — a dropped connection is detected server-side and the stream resumes automatically, retrying up to 3 times before falling back to a manual Retry button. See ARCHITECTURE.md for implementation details.
-- [ ] Regenerate last reply
+- [x] **Regenerate last reply** — a Regenerate button appears under the assistant's most recent reply once it finishes streaming, letting the user get a new response in its place. See ARCHITECTURE.md for implementation details.
 - [ ] Tests proving server-side cancellation
 - [ ] Docker + docker-compose
 
