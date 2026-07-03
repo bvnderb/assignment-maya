@@ -111,3 +111,17 @@ Because the streaming loop already checks `controller.signal.aborted` and saves 
 **Client-side auto-retry:** `handleError` checks a `retryCount` ref against a `maxRetries` cap (3) before falling back to the existing failed/Retry-button state. If attempts remain, it increments the counter, closes the stale `EventSource`, and calls `handleResume()` automatically. The counter resets to `0` on two "connection is healthy again" signals: a stream reaching its `done` event, or the user manually clicking Retry. Without a cap, a persistently unreachable server would cause an infinite retry loop — each failed resume attempt opening a new `EventSource` that immediately errors again, forever.
 
 **Testing note:** verifying this locally has a couple of non-obvious gotchas. Chrome DevTools' "Offline" network throttle does not reliably interrupt an already-open connection to `localhost` — the stream kept flowing as if nothing happened. Killing and restarting the local server to simulate a drop doesn't work either, since `pausedStreams` only ever lives in that process's memory and gets wiped on restart. The reliable local test was to reload the browser tab mid-stream (a real disconnect from the server's perspective, while the server process itself stays untouched) and manually hit `/chat/resume/:streamId` to confirm the server resumed from the correct word instead of 404ing.
+
+---
+
+## Bonus: Regenerate last reply
+
+A Regenerate button appears under the assistant's most recent reply once it has finished streaming successfully, letting the user request a new response in its place.
+
+**Deciding when to show it:** `MessageList.jsx` computes a `showRegenerate` boolean while mapping over `messages`:
+```js
+const showRegenerate = index === messages.length - 1 && message.role === "assistant" && streamStatus === "idle";
+```
+All three conditions matter: it must be the *last* message in the conversation (not an older reply), it must be the *assistant's* message (not the user's), and `streamStatus` must be `"idle"` (the stream has actually finished — not mid-stream, not stopped, not failed, since those states are handled by the existing Stopped label and Retry button instead).
+
+**Reusing `handleRetry` instead of writing a new function:** Regenerating a reply needs to do exactly what retrying a failed one does — clear the bubble's content, close any stale `EventSource`, open a fresh `/chat/stream`, and reset `retryCount` back to `0` so the new stream gets a full auto-resume budget if it happens to drop. Since none of those steps are specific to the failure case, the Regenerate button's `onClick` reuses `handleRetry` directly rather than duplicating a near-identical function.
