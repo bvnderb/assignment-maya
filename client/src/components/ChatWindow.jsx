@@ -8,6 +8,8 @@ function ChatWindow() {
   const [streamStatus, setStreamStatus] = useState("idle");
   const [inputValue, setInputValue] = useState("");
   const sourceRef = useRef(null);
+  const retryCount = useRef(0);
+  const maxRetries = 3;
 
   useEffect(() => {
         localStorage.setItem("chatState", JSON.stringify(messages))
@@ -27,6 +29,7 @@ function ChatWindow() {
     source.addEventListener("done", () => {
       setStreamStatus("idle");
       console.log("stream done");
+      retryCount.current = 0;
       source.close();
     });
 
@@ -95,13 +98,20 @@ function handleResume() {
 }
 
   function handleError() {
-    sourceRef.current.close();
-    setStreamStatus("failed");
-    setMessages((prev) => {
+    if((retryCount.current < maxRetries)) {
+        retryCount.current++
+        sourceRef.current.close()
+        handleResume();
+    } else {
+      sourceRef.current.close();
+      setStreamStatus("failed");
+      setMessages((prev) => {
       const updated = [...prev];
       updated[prev.length - 1].failed = true;
       return updated;
     })
+    }
+    
   }
 
   function handleRetry() {
@@ -115,6 +125,7 @@ function handleResume() {
     })
     sourceRef.current = new EventSource(`${import.meta.env.VITE_API_URL}/chat/stream`);
     attachListeners(sourceRef.current);
+    retryCount.current = 0;
   }
 
   return (
