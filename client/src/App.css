@@ -38,12 +38,18 @@ textarea {
 }
 
 .btn {
-  padding: 10px 20px;
-  border-radius: 50%;
+  padding: 10px 24px;
+  border-radius: 24px;
   border: none;
   outline: none;
-  background: none;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover {
+  opacity: 0.85;
 }
 
 .btn-send {
@@ -53,7 +59,7 @@ textarea {
 
 .btn-stop {
   color: white;
-  background: blue;
+  background: #E15554;
 }
 
 .btn-resume {
@@ -126,7 +132,8 @@ textarea {
   color: #333;
 }
 
-.btn-retry {
+.btn-retry,
+.btn-regenerate {
   margin-top: 4px;
   background: none;
   border: 1px solid #7B68F9;
@@ -137,6 +144,7 @@ textarea {
   cursor: pointer;
 }
 
-.btn-retry:hover {
+.btn-retry:hover,
+.btn-regenerate:hover {
   background: rgba(123, 104, 249, 0.1);
 }
