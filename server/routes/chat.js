@@ -14,7 +14,8 @@ const streamMessage = async (res, streamId, messageIndex, startFrom) => {
 
     res.write(`data: ${JSON.stringify({ type: "connected", streamId })}\n\n`)
 
-    const controller = new AbortController()
+    const controller = new AbortController() 
+    res.on("close", () => controller.abort())
     activeStreams[streamId] = controller
 
     const words = ASSISTANT_MESSAGES[messageIndex].split(" ")
