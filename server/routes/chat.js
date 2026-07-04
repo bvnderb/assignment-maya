@@ -61,4 +61,4 @@ router.get("/resume/:streamId", async (req, res) => {
 })
 
 
-module.exports = router
+module.exports = { router, streamMessage }
