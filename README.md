@@ -55,7 +55,7 @@ The client runs on **http://localhost:5173**
 - [x] **Conversation persistence (localStorage)** — chat history is saved to `localStorage` on every change and restored automatically on page load/refresh. See ARCHITECTURE.md for implementation details.
 - [x] **Resume after reconnect** — a dropped connection is detected server-side and the stream resumes automatically, retrying up to 3 times before falling back to a manual Retry button. See ARCHITECTURE.md for implementation details.
 - [x] **Regenerate last reply** — a Regenerate button appears under the assistant's most recent reply once it finishes streaming, letting the user get a new response in its place. See ARCHITECTURE.md for implementation details.
-- [ ] Tests proving server-side cancellation
+- [x] **Tests proving server-side cancellation** — a Jest unit test calls `streamMessage` directly with a mocked `res` object, triggers cancellation on command, and asserts no further tokens are written afterward. Reconciliation after a failure was verified manually rather than automated, given time already invested — see ARCHITECTURE.md for details and reasoning.
 - [ ] Docker + docker-compose
 
 (In progress — being completed incrementally.)
