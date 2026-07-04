@@ -2,6 +2,8 @@
 
 A streaming chat application where a user sends a message and the assistant replies word by word, like ChatGPT. Built with React on the frontend and Node.js + Express on the backend, using Server-Sent Events (SSE) for streaming.
 
+**Live deployed app:** https://maya-streaming-ai-chat.up.railway.app/
+
 ---
 
 ## How to run locally
@@ -38,6 +40,16 @@ npm run dev
 
 The client runs on **http://localhost:5173**
 
+### Alternative: Docker
+
+If you have Docker installed, both services can be built and started together with one command from the project root:
+
+```bash
+docker compose up --build
+```
+
+Same addresses as above: server on **http://localhost:3000**, client on **http://localhost:5173**.
+
 ---
 
 ## Features
@@ -56,9 +68,9 @@ The client runs on **http://localhost:5173**
 - [x] **Resume after reconnect** — a dropped connection is detected server-side and the stream resumes automatically, retrying up to 3 times before falling back to a manual Retry button. See ARCHITECTURE.md for implementation details.
 - [x] **Regenerate last reply** — a Regenerate button appears under the assistant's most recent reply once it finishes streaming, letting the user get a new response in its place. See ARCHITECTURE.md for implementation details.
 - [x] **Tests proving server-side cancellation** — a Jest unit test calls `streamMessage` directly with a mocked `res` object, triggers cancellation on command, and asserts no further tokens are written afterward. Reconciliation after a failure was verified manually rather than automated, given time already invested — see ARCHITECTURE.md for details and reasoning.
-- [ ] Docker + docker-compose
+- [x] **Docker + docker-compose** — both services run in containers, started together with a single `docker compose up --build` command. See ARCHITECTURE.md for implementation details.
 
-(In progress — being completed incrementally.)
+All bonuses complete.
 
 ---
 
