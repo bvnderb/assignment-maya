@@ -1,4 +1,5 @@
 # Maya Travel — Streaming Chat Assignment
+Built as part of an application for the Full-Stack Developer position at Maya Travel.
 
 A streaming chat application where a user sends a message and the assistant replies word by word, like ChatGPT. Built with React on the frontend and Node.js + Express on the backend, using Server-Sent Events (SSE) for streaming.
 
@@ -76,4 +77,6 @@ All bonuses complete.
 
 ## Time spent
 
-~22 hours on the core app. According to Waka time, divided over about 2 weeks from getting the assignment to finishing it.
+~22 hours on the core app. 
+~8 extra hours were spent on the bonus tasks. 
+Bringing the total time to 30 hours of development, roughly 2 weeks from the day I received the assignment to completion. 
