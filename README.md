@@ -3,7 +3,7 @@ Built as part of an application for the Full-Stack Developer position at Maya Tr
 
 A streaming chat application where a user sends a message and the assistant replies word by word, like ChatGPT. Built with React on the frontend and Node.js + Express on the backend, using Server-Sent Events (SSE) for streaming.
 
-**Live deployed app:** https://maya-streaming-ai-chat.up.railway.app/
+**Live deployed app:** https://maya-streaming-ai-chat.up.railway.app/ => no longer online. 
 
 ---
 
